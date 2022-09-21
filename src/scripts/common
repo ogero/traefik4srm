@@ -1,0 +1,72 @@
+#!/bin/sh
+# Copyright (C) 2000-2013 Synology Inc. All rights reserved.
+
+USR_BIN_FILES="traefik"
+
+CHECK_AND_LINK_FILE()
+{
+	LINK=$1
+	LINK_TARGET="`realpath ${SYNOPKG_PKGDEST}${LINK}`"
+	LINK_BASE=`dirname $1`
+
+	if [ ! -d "$LINK_BASE" ]; then
+		mkdir -p $LINK_BASE
+	fi
+	if [ -e "$LINK" ]; then
+		rm -rf $LINK
+	fi
+	if [ ! -e "$LINK" ]; then
+		ln -sf $LINK_TARGET $LINK
+	fi
+}
+
+DO_LINK()
+{
+	for file in $USR_BIN_FILES
+	do
+		CHECK_AND_LINK_FILE "/usr/bin/$file"
+	done
+}
+
+CHECK_AND_REMOVE()
+{
+	[ -L $1 ] && rm $1
+}
+
+DO_REMOVE()
+{
+	for file in $USR_BIN_FILES
+	do
+		CHECK_AND_REMOVE "/usr/bin/$file"
+	done
+}
+
+CHECK_LINK_TARGET()
+{
+	LINK=$1
+	LINK_TARGET_REAL="`readlink ${LINK}`"
+	LINK_TARGET="`realpath ${SYNOPKG_PKGDEST}${LINK}`"
+
+	if [ -z "${LINK_TARGET_REAL}" ]; then
+		return 1
+	fi
+
+	if [ "${LINK_TARGET_REAL}" != "${LINK_TARGET}" ]; then
+		return 1
+	fi
+
+	return 0
+}
+
+CHECK_LINK()
+{
+	for file in $USR_BIN_FILES
+	do
+		CHECK_LINK_TARGET "/usr/bin/${file}"
+		if [ "$?" -eq 1 ]; then
+			return 1
+		fi
+	done
+
+	return 0
+}

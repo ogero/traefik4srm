@@ -1,0 +1,21 @@
+#!/bin/sh
+# Copyright (C) 2000-2013 Synology Inc. All rights reserved.
+
+. `dirname $0`/common
+
+TRAEFIK_CONFIG_FILE="traefik4srm.conf"
+TRAEFIK_CONFIG="${SYNOPKG_PKGDEST}/${TRAEFIK_CONFIG_FILE}"
+TRAEFIK_USER="$(echo "${SYNOPKG_PKGNAME}" | awk '{print tolower($_)}')"
+LOG="${SYNOPKG_PKGDEST}/${TRAEFIK_USER}.log"
+
+echo "[$(date +'%T')] #### Start postuninst... ####" >>"${LOG}"
+
+echo "[$(date +'%T')] Removing Traefik4srm startup config file at \"${TRAEFIK_CONFIG}\"" >>"${LOG}"
+rm -f "${TRAEFIK_CONFIG}"
+
+echo "[$(date +'%T')] Unlinking Traefik binaries" >>"${LOG}"
+DO_REMOVE
+
+echo "[$(date +'%T')] #### Done postuninst ####" >>"${LOG}"
+
+exit 0

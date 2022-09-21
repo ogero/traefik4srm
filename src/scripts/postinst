@@ -1,0 +1,33 @@
+#!/bin/sh
+# Copyright (C) 2000-2013 Synology Inc. All rights reserved.
+
+. `dirname $0`/common
+
+if [ "$SYNOPKG_PKG_STATUS" = "INSTALL" ]; then
+
+    TRAEFIK_CONFIG_FILE="traefik4srm.conf"
+    TRAEFIK_CONFIG="${SYNOPKG_PKGDEST}/${TRAEFIK_CONFIG_FILE}"
+    TRAEFIK_USER="$(echo "${SYNOPKG_PKGNAME}" | awk '{print tolower($_)}')"
+    LOG="${SYNOPKG_PKGDEST}/${TRAEFIK_USER}.log"
+
+    echo "[$(date +'%T')] #### Start postinst... ####" >>"${LOG}"
+
+    echo "[$(date +'%T')] Linking Traefik binaries" >>"${LOG}"
+    DO_LINK
+
+    echo "[$(date +'%T')] Creating Traefik4srm startup config file at \"${TRAEFIK_CONFIG}\"" >>"$LOG"
+    touch "${TRAEFIK_CONFIG}"
+
+    # shellcheck disable=SC2154
+    {
+        echo "[$(date +'%T')] Setting STATIC_CONFIG_FILE=${wizard_static_config_path} in \"${TRAEFIK_CONFIG}\""
+    } >>"$LOG"
+    {
+        echo "STATIC_CONFIG_FILE=${wizard_static_config_path}"
+    } >>"${TRAEFIK_CONFIG}"
+
+    echo "[$(date +'%T')] #### Done postinst ####" >>"${LOG}"
+
+fi
+
+exit 0

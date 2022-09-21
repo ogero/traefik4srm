@@ -1,0 +1,100 @@
+#!/bin/sh
+# Copyright (C) 2000-2013 Synology Inc. All rights reserved.
+
+. `dirname $0`/common
+
+TRAEFIK_CONFIG_FILE="traefik4srm.conf"
+TRAEFIK_CONFIG="${SYNOPKG_PKGDEST}/${TRAEFIK_CONFIG_FILE}"
+TRAEFIK_USER="$(echo "${SYNOPKG_PKGNAME}" | awk '{print tolower($_)}')"
+LOG="${SYNOPKG_PKGDEST}/${TRAEFIK_USER}.log"
+
+# shellcheck disable=SC1090
+. "${TRAEFIK_CONFIG}"
+
+# shellcheck disable=SC2009
+get_pid() {
+    PID=$(ps | grep -E 'traefik' | grep -v grep | awk '{print $1}')
+}
+
+start_traefik_with_static_config_file() {
+
+    echo "[$(date +'%T')] Starting Traefik with config file ${STATIC_CONFIG_FILE}" >>"${LOG}"
+
+    nohup /usr/bin/traefik --configFile="${STATIC_CONFIG_FILE}" > /dev/null 2>&1 &
+
+    return 0
+}
+
+start_traefik() {
+    if [ -n "${STATIC_CONFIG_FILE}" ]; then
+        if start_traefik_with_static_config_file; then
+            echo "[$(date +'%T')] Traefik successfully started!" >>"${LOG}"
+            return 0
+        else
+            echo "[$(date +'%T')] Failed to start Traefik, stopping it..." >>"${LOG}"
+            stop_traefik
+        fi
+    else
+        echo "[$(date +'%T')] Traefik4srm startup config file cannot be found! Please uninstall the package and reinstall it again (or change STATIC_CONFIG_FILE in \"${TRAEFIK_CONFIG}\")!" >>"${LOG}"
+        exit 150
+    fi
+
+}
+
+stop_traefik() {
+    get_pid
+    if [ -n "${PID}" ]; then
+        # shellcheck disable=SC2086
+        kill $PID
+    else
+        return 0
+    fi
+    sleep 10
+
+    # shellcheck disable=SC2009
+    if ! ps | grep -E 'traefik' | grep -v -q grep; then
+        return 0
+    else
+        echo "[$(date +'%T')] Stop: Traefik is still running!" >>"${LOG}"
+        return 1
+    fi
+    return 1
+}
+
+traefik_status() {
+    # shellcheck disable=SC2009
+    if ps | grep -E 'traefik' | grep -v -q grep; then
+        return 0
+    else
+        echo "[$(date +'%T')] Status: Traefik not running!" >>"${LOG}"
+        return 3
+    fi
+    # return unknown if nothing matched
+    return 4
+}
+
+case $1 in
+start)
+    echo "[$(date +'%T')] Starting Traefik ..." >>"${LOG}"
+    start_traefik
+    exit $?
+    ;;
+stop)
+    echo "[$(date +'%T')] Stopping Traefik ..." >>"${LOG}"
+    stop_traefik
+    exit $?
+    ;;
+status)
+    if traefik_status; then
+        echo "[$(date +'%T')] Traefik is running" >>"${LOG}"
+        exit 0
+    else
+        echo "[$(date +'%T')] Traefik is not running" >>"${LOG}"
+        exit 3
+    fi
+    ;;
+log)
+    echo "${LOG}"
+    exit 0
+    ;;
+esac

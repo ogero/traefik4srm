@@ -1,0 +1,12 @@
+[{
+	"step_title": "Traefik configuration",
+	"items": [{
+		"type": "textfield",
+		"desc": "Configuration file to use. This file and it's references should be placed on an EXT filesystem. Defaults to /volumeUSB1/usbshare1-1/traefik/static.yaml",
+		"subitems": [{
+			"key": "wizard_static_config_path",
+			"desc": "YAML config file",
+			"emptyText": "/volumeUSB1/usbshare1-1/traefik/static.yaml"
+		}]
+	}]
+}]
