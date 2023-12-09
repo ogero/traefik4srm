@@ -1,3 +1,6 @@
 .idea
+*.sw[op]
 package.sh
 Traefik4srm.spk
+src/package.tgz
+
