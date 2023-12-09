@@ -1,0 +1,71 @@
+#!/bin/bash
+set -u
+
+function main() {
+    if [[ $# != 1 ]]; then
+        usage
+        return
+    fi
+
+    download_traefik $1
+    create_package
+}
+
+# Downloads, verifies and extracts traefik binary to /tmp/traefik/*.
+function download_traefik() {
+    local VERSION="$1"
+    echo "Downloading traefik v$VERSION..."
+
+    # NOTE: We need to use armv7 for SRM.
+    curl -Lfo /tmp/traefik.tar.gz "https://github.com/traefik/traefik/releases/download/v${VERSION}/traefik_v${VERSION}_linux_armv7.tar.gz"
+    if [[ $? != 0 ]]; then
+        echo "fatal: failed to download binary"
+        return 1
+    fi
+
+    # Verify integrity
+    curl -Lfo /tmp/traefik.checksums https://github.com/traefik/traefik/releases/download/v${VERSION}/traefik_v${VERSION}_checksums.txt
+    if [[ $? != 0 ]]; then
+        echo "fatal: failed to download checksums"
+        return 1
+    fi
+
+    expected=`grep "traefik_v${VERSION}_linux_armv7" /tmp/traefik.checksums | cut -d ' ' -f 1`
+    actual=`sha256sum /tmp/traefik.tar.gz | cut -d ' ' -f 1`
+    if [[ "$expected" != "$actual" ]]; then
+        echo "fatal: checksum check failed"
+        return 1
+    fi
+
+    # Extract to expected destination
+    rm -r /tmp/traefik && mkdir -p /tmp/traefik
+    tar xf /tmp/traefik.tar.gz -C /tmp/traefik
+
+    echo "Download complete!"
+    rm /tmp/traefik.tar.gz /tmp/traefik.checksums
+}
+
+# Bundles the traefik binary for the Synology package.
+#
+# For more information, see https://help.synology.com/developer-guide/synology_package/package_tgz.html
+function create_package() {
+    mkdir -p /tmp/traefik/usr/bin
+    mv /tmp/traefik/traefik /tmp/traefik/usr/bin/
+    mv /tmp/traefik/LICENSE* /tmp/traefik/usr/bin/
+
+    # Remove any other files that are not necessary to be bundled.
+    ls -Ad /tmp/traefik/* | grep -vE '/usr$' | xargs rm
+
+    # Bundle file as package.tgz
+    tar -C /tmp/traefik -czf package.tgz usr
+
+    # Clean up temporary files
+    rm -r /tmp/traefik
+}
+
+function usage() {
+    echo "Usage: ./download-traefik [version]"
+    echo "Downloads the traefik binary for use on the SynologyRouter."
+}
+
+main "$@"
