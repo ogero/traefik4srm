@@ -1,5 +1,5 @@
 package="Traefik4srm"
-version="0.0.1-0002"
+version="2.11.2-0002"
 maintainer="Gerónimo Oñativia"
 maintainer_url="https://github.com/ogero/traefik4srm"
 arch="ipq806x"

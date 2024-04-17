@@ -1,11 +1,22 @@
 #!/bin/sh
 # Copyright (C) 2000-2013 Synology Inc. All rights reserved.
 
+# customized items of package
+if [ -z "$SYNOPKG_PKGNAME" ]; then
+        # prior DSM 3.2, start script will be run without environment variable
+        #  at boot time, thus we need a workaround to gather name and version info
+        PACKAGE_NAME="Traefik4srm"
+        PACKAGE_VER=`get_key_value "/var/packages/${PACKAGE_NAME}/INFO" "version"`
+else
+        PACKAGE_NAME=$SYNOPKG_PKGNAME
+        PACKAGE_VER=$SYNOPKG_PKGVER
+fi
+
 . `dirname $0`/common
 
 TRAEFIK_CONFIG_FILE="traefik4srm.conf"
 TRAEFIK_CONFIG="${SYNOPKG_PKGDEST}/${TRAEFIK_CONFIG_FILE}"
-TRAEFIK_USER="$(echo "${SYNOPKG_PKGNAME}" | awk '{print tolower($_)}')"
+TRAEFIK_USER="$(echo "${PACKAGE_NAME}" | awk '{print tolower($_)}')"
 LOG="${SYNOPKG_PKGDEST}/${TRAEFIK_USER}.log"
 
 echo "[$(date +'%T')] #### Start postuninst... ####" >>"${LOG}"
