@@ -1,5 +1,5 @@
 # Version of traefik to install.
-VERSION=2.10.7
+VERSION=2.11.2
 
 package: src/package.tgz src/scripts src/WIZARD_UIFILES src/INFO src/PACKAGE_ICON.PNG src/PACKAGE_ICON_256.PNG
 	echo $^ | sed 's|src/||g' | xargs tar -C src/ -cf Traefik-$(VERSION)-srm.spk
