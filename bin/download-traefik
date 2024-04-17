@@ -38,7 +38,7 @@ function download_traefik() {
     fi
 
     # Extract to expected destination
-    rm -r /tmp/traefik && mkdir -p /tmp/traefik
+    rm -rf /tmp/traefik && mkdir -p /tmp/traefik
     tar xf /tmp/traefik.tar.gz -C /tmp/traefik
 
     echo "Download complete!"
