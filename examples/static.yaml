@@ -2,39 +2,39 @@ providers:
   file:
     watch: true
     filename: /volumeUSB1/usbshare1-2/traefik/dynamic.yaml
-  log:
-    level: ERROR
-  accessLog:
-    filePath: "/dev/null"
-  global:
-    checkNewVersion: false
-    sendAnonymousUsage: true
-  certificatesResolvers:
-    le-staging:
-      acme:
-        caServer: https://acme-staging-v02.api.letsencrypt.org/directory
-        storage: /volumeUSB1/usbshare1-2/traefik/acme.json # 600 file mode required
-        email: your-own-email
-        httpChallenge:
-          entryPoint: web
-    le-production:
-      acme:
-        caServer: https://acme-v02.api.letsencrypt.org/directory
-        storage: /volumeUSB1/usbshare1-2/traefik/acme.json # 600 file mode required
-        email: your-own-email
-        httpChallenge:
-          entryPoint: web
-  entryPoints:
-    web:
-      address: ":8080"
-      http:
-        redirections:
-          entryPoint:
-            to: ":443"
-            permanent: false
-            scheme: https
-            priority : 100000
-    websecure:
-      address: ":8443"
-    openvpn:
-      address: ":8194/udp"
+log:
+  level: ERROR
+accessLog:
+  filePath: "/dev/null"
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: true
+certificatesResolvers:
+  le-staging:
+    acme:
+      caServer: https://acme-staging-v02.api.letsencrypt.org/directory
+      storage: /volumeUSB1/usbshare1-2/traefik/acme.json # 600 file mode required
+      email: your-own-email
+      httpChallenge:
+        entryPoint: web
+  le-production:
+    acme:
+      caServer: https://acme-v02.api.letsencrypt.org/directory
+      storage: /volumeUSB1/usbshare1-2/traefik/acme.json # 600 file mode required
+      email: your-own-email
+      httpChallenge:
+        entryPoint: web
+entryPoints:
+  web:
+    address: ":8080"
+    http:
+      redirections:
+        entryPoint:
+          to: ":443"
+          permanent: false
+          scheme: https
+          priority : 100000
+  websecure:
+    address: ":8443"
+  openvpn:
+    address: ":8194/udp"
