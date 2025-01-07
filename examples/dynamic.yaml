@@ -9,54 +9,54 @@ tls:
         - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
         - TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA
         - TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA
-  udp:
-    services:
-      openvpn:
-        loadBalancer:
-          servers:
-            - address: "127.0.0.1:1194"
-    routers:
-      openvpn:
-        entryPoints:
-          - "openvpn"
-        service: openvpn
-  http:
-    serversTransports:
-      insecure-skip-verify:
-        insecureSkipVerify: true
-    services:
-      dsm:
-        loadBalancer:
-          serversTransport: insecure-skip-verify
-          healthCheck:
-            path: /
-            scheme: https
-          servers:
-            - url: https://10.0.0.2:5001/
-      srm:
-        loadBalancer:
-          serversTransport: insecure-skip-verify
-          healthCheck:
-            path: /
-            scheme: https
-          servers:
-            - url: https://127.0.0.1:8001/
-    routers:
-      dsm:
-        entryPoints:
-          - "web"
-          - "websecure"
-        rule: "Host(`dsm.mydomain.com`)"
-        service: dsm
-        tls:
-          certResolver: le-production
-          options: ssllabs
-      srm:
-        entryPoints:
-          - "web"
-          - "websecure"
-        rule: "Host(`srm.mydomain.com`)"
-        service: srm
-        tls:
-          certResolver: le-production
-          options: ssllabs
+udp:
+  services:
+    openvpn:
+      loadBalancer:
+        servers:
+          - address: "127.0.0.1:1194"
+  routers:
+    openvpn:
+      entryPoints:
+        - "openvpn"
+      service: openvpn
+http:
+  serversTransports:
+    insecure-skip-verify:
+      insecureSkipVerify: true
+  services:
+    dsm:
+      loadBalancer:
+        serversTransport: insecure-skip-verify
+        healthCheck:
+          path: /
+          scheme: https
+        servers:
+          - url: https://10.0.0.2:5001/
+    srm:
+      loadBalancer:
+        serversTransport: insecure-skip-verify
+        healthCheck:
+          path: /
+          scheme: https
+        servers:
+          - url: https://127.0.0.1:8001/
+  routers:
+    dsm:
+      entryPoints:
+        - "web"
+        - "websecure"
+      rule: "Host(`dsm.mydomain.com`)"
+      service: dsm
+      tls:
+        certResolver: le-production
+        options: ssllabs
+    srm:
+      entryPoints:
+        - "web"
+        - "websecure"
+      rule: "Host(`srm.mydomain.com`)"
+      service: srm
+      tls:
+        certResolver: le-production
+        options: ssllabs
